@@ -7,6 +7,7 @@ from forms import AddDeviceForm
 
 import json
 import re
+import string
 
 from django.shortcuts import *
 
@@ -33,15 +34,40 @@ def device(request, device_uid):
         #Next, Munge the software list at json_data['software'] to find CPEs, etc.
         for software in json_data['software']:
             name = software['name'].lower()
+            version = software['versionString'].lower()
+            publisher = software['publisher'].lower()
 
-            match = re.match("(.*?)[Vv ]*(\d+\.\d*)", name)
+            #Remove version strings in the software name
+            match = re.match("(.*?)[Vv \.]*(ersion\.)?(\d+\.\d*)", name)
             if match:
                 if software['versionString'] == "null":
                     software['versionString'] = match.group(2)
                 name = match.group(1)
 
-        #name and software['versionString'] should be roughly correct.
-        #I can't remove the potential "Microsoft"/publishers at the start though
+            #Publisher like "Microsoft Corporation" will find "Microsoft"
+            publisher = publisher.split(",")[0] #Removes ", Inc" etc.
+            publisher_words = publisher.split(" ")
+
+            #Attempt to grab things like "amd"
+            if len(publisher_words) > 2: #Only 3 or more words
+                acronym = ""
+                for word in publisher_words:
+                    if len(word) > 0:
+                        acronym += word[0]
+                publisher_words.append(acronym)
+
+            #Remove publisher names at the start, if we can
+            for word in publisher_words:
+                #Try and compare
+                if word in name:
+                    publisher = word
+                    replaced_name = name.replace(word, "").strip()
+                    #Products with a single name, e.g. Evernote by Evernote
+                    if replaced_name != "":
+                        name = replaced_name
+
+
+        #Add software to the database now
 
     response = HttpResponse(device_uid)
     response["Access-Control-Allow-Origin"] = "*"
