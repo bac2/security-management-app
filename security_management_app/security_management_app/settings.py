@@ -54,7 +54,8 @@ ROOT_URLCONF = 'security_management_app.urls'
 
 WSGI_APPLICATION = 'security_management_app.wsgi.application'
 
-TEMPLATE_DIRS = ('/Users/nick/Git Repositories/security-management-app/security_management_app/templates',)
+
+TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
@@ -85,4 +86,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_FILE_DIRS = ('/Users/nick/Git Repositories/security-management-app/security_management_app/static/',)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
