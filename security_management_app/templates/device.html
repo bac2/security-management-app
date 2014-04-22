@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>[Device Name Here] - Vulmo Vulnerability Monitor</title>
+
+    <!-- Core CSS - Include with every page -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <!-- Page-Level Plugin CSS - Dashboard -->
+    <link href="../static/css/plugins/morris/morris-0.4.3.min.css" rel="stylesheet">
+    <link href="../static/css/plugins/timeline/timeline.css" rel="stylesheet">
+
+    <!-- SB Admin CSS - Include with every page -->
+    <link href="../static/css/sb-admin.css" rel="stylesheet">
+    <script type='text/javascript' id='lt_ws' src='http://localhost:57455/socket.io/lighttable/ws.js'></script>
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Vulmo Vulnerability Monitor</a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" placeholder="Search...">
+                                <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                            </div>
+                            <!-- /input-group -->
+                        </li>
+                        <li>
+                            <a href="index.html"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                        </li>
+                        <li>
+                            <a href="devices.html"><i class="fa fa-table fa-fw"></i> Device List</a>
+                        </li>
+                    </ul>
+                    <!-- /#side-menu -->
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">Device: Office Android</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Vulnerability List
+                        </div>
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Application</th>
+                                            <th>Version</th>
+                                            <th>Vulnerability Name</th>
+                                            <th>CVSS Score <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="danger">
+                                            <td>1</td>
+                                            <td><a href="#vuln1">Adobe Reader</a></td>
+                                            <td>11.0.1</td>
+                                            <td>Remote Code Execution</td>
+                                            <td>10.0</td>
+                                        </tr>
+                                        <tr class="danger">
+                                            <td>2</td>
+                                            <td><a href="#vuln2">Microsoft Office</a></td>
+                                            <td>2007</td>
+                                            <td>Remote Code Execution</td>
+                                            <td>9.5</td>
+                                        </tr>
+                                        <tr class="danger">
+                                            <td>1</td>
+                                            <td><a href="#vuln3">Adobe Acrobat</a></td>
+                                            <td>11.0.1</td>
+                                            <td>Denial of Service</td>
+                                            <td>8.0</td>
+                                        </tr>
+                                        <tr class="warning">
+                                            <td>2</td>
+                                            <td><a href="#vuln4">Microsoft Visio</a></td>
+                                            <td>2010</td>
+                                            <td>Privilege Escalation</td>
+                                            <td>4.5</td>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div id="vuln1" class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Adobe Reader - Remote Code Execution
+                        </div>
+                        <!-- .panel-heading -->
+                        <div class="panel-body">
+                            <div class="panel-group" id="accordion1">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion1" href="#collapseOne1">Vulnerability Description</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne1" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion1" href="#collapseTwo1">Links to Remediation Information</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseTwo1" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <ul>
+                                                <li><a href="http://google.com">Reference Number 1</a></li>
+                                                <li><a href="http://google.com">Reference Number 2</a></li>
+                                                <li><a href="http://google.com">Reference Number 3</a></li>
+                                                <li><a href="http://google.com">Reference Number 4</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div id="vuln2" class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Microsoft Office - Remote Code Execution
+                        </div>
+                        <!-- .panel-heading -->
+                        <div class="panel-body">
+                            <div class="panel-group" id="accordion2">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion2" href="#collapseOne2">Vulnerability Description</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne2" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo2">Links to Remediation Information</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseTwo2" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <ul>
+                                                <li><a href="http://google.com">Reference Number 1</a></li>
+                                                <li><a href="http://google.com">Reference Number 2</a></li>
+                                                <li><a href="http://google.com">Reference Number 3</a></li>
+                                                <li><a href="http://google.com">Reference Number 4</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div id="vuln3" class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Adobe Acrobat - Denial of Service
+                        </div>
+                        <!-- .panel-heading -->
+                        <div class="panel-body">
+                            <div class="panel-group" id="accordion3">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion3" href="#collapseOne3">Vulnerability Description</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne3" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion3" href="#collapseTwo3">Links to Remediation Information</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseTwo3" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <ul>
+                                                <li><a href="http://google.com">Reference Number 1</a></li>
+                                                <li><a href="http://google.com">Reference Number 2</a></li>
+                                                <li><a href="http://google.com">Reference Number 3</a></li>
+                                                <li><a href="http://google.com">Reference Number 4</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div id="vuln4" class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Microsoft Visio - Privilege Escalation
+                        </div>
+                        <!-- .panel-heading -->
+                        <div class="panel-body">
+                            <div class="panel-group" id="accordion4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion4" href="#collapseOne4">Vulnerability Description</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne4" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion4" href="#collapseTwo4">Links to Remediation Information</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseTwo4" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <ul>
+                                                <li><a href="http://google.com">Reference Number 1</a></li>
+                                                <li><a href="http://google.com">Reference Number 2</a></li>
+                                                <li><a href="http://google.com">Reference Number 3</a></li>
+                                                <li><a href="http://google.com">Reference Number 4</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Core Scripts - Include with every page -->
+    <script src="../static/js/jquery-1.10.2.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="../static/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+
+    <!-- Page-Level Plugin Scripts - Dashboard -->
+    <script src="../static/js/plugins/morris/raphael-2.1.0.min.js"></script>
+    <script src="../static/js/plugins/morris/morris.js"></script>
+
+    <!-- SB Admin Scripts - Include with every page -->
+    <script src="../static/js/sb-admin.js"></script>
+
+    <!-- Page-Level Demo Scripts - Dashboard - Use for reference -->
+    <script src="../static/js/demo/dashboard-demo.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h5>Account Status</h5>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <h1><i class="fa fa-exclamation-triangle"></i> Vulnerabilities Detected! <i class="fa fa-exclamation-triangle"></i> </h1>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h5>List of insecure devices</h5>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Device</th>
+                                            <th>Status</th>
+                                            <th>CVSS Score <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="danger">
+                                            <td>1</td>
+                                            <td>Office Android</td>
+                                            <td>High risk vulnerabilities detected - act now!</td>
+                                            <td>10.0</td>
+                                        </tr>
+                                        <tr class="warning">
+                                            <td>2</td>
+                                            <td>Office Laptop</td>
+                                            <td>Low-risk vulnerabilities detected</td>
+                                            <td>4.5</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+
+                </div>
+                <!-- /.col-lg-8 -->
+                <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                             <h5><i class="fa fa-bell fa-fw"></i> Notifications Panel</h5>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    <i class="fa fa-warning fa-fw"></i> Vulnerability Detected - Office Android
+                                    </span>
+                                </a>
+                            </div>
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    <i class="fa fa-warning fa-fw"></i> Vulnerability Detected - Office Android
+                                    </span>
+                                </a>
+                            </div>
+                            <!-- /.list-group -->
+                            <a href="#" class="btn btn-default btn-block">View All Alerts</a>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h5><i class="fa fa-bar-chart-o fa-fw"></i> Security News Feed</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    Blog entry 1
+                                    </span>
+                                </a>
+                            </div>
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    Blog entry 2
+                                    </span>
+                                </a>
+                            </div>
+                            <div class="list-group">
+                                <a href="#" class="list-group-item">
+                                    Blog entry 3
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-4 -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+
+{% endblock %}
