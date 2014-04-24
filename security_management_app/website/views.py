@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 
-from models import Device
+from models import Device, Cpe
 from forms import AddDeviceForm
 
 import json
+from fuzzywuzzy import fuzz
 import re
 import string
 
@@ -21,28 +23,31 @@ def index(request):
 def device(request, device_uid):
 
     if request.method == "POST":
-        json_data = json.loads(request.body)
+        safe = 0
+        unsafe = 0
+        similar = 0
+        unique_apps = {}
+        json_data = json.loads(request.body.decode("unicode_escape"))
         try:
             device = Device.objects.get(uid=device_uid)
         except Device.DoesNotExist:
             return HttpResponse("Device does not exist", status=404)
-        device.os = json_data['meta']['os_name']
-        device.nickname = json_data['meta']['nickname']
-        device.uid = device_uid
-        device.save()
 
         #Next, Munge the software list at json_data['software'] to find CPEs, etc.
         for software in json_data['software']:
-            name = software['name'].lower()
-            version = software['versionString'].lower()
-            publisher = software['publisher'].lower()
+            name = unicode(software['name'].lower())
+            version = unicode(software['versionString'].lower())
+            publisher = unicode(software['publisher'].lower())
 
             #Remove version strings in the software name
-            match = re.match("(.*?)[Vv \.]*(ersion\.)?(\d+\.\d*)", name)
+            match = re.match("(.*?)[Vv \.]*(ersion\.)?(\d+(\.\d*)+)(.*)", name)
             if match:
-                if software['versionString'] == "null":
-                    software['versionString'] = match.group(2)
+                if version == "null" and match.group(3) is not None:
+                    version = match.group(3)
                 name = match.group(1)
+
+            if version == "null":
+                continue
 
             #Publisher like "Microsoft Corporation" will find "Microsoft"
             publisher = publisher.split(",")[0] #Removes ", Inc" etc.
@@ -56,6 +61,11 @@ def device(request, device_uid):
                         acronym += word[0]
                 publisher_words.append(acronym)
 
+            #Remove some brackets (Usually x64 stuff)
+            brackets = re.search("(\(.*\))", name)
+            if brackets:
+                name = name.replace(brackets.group(1), "").strip()
+
             #Remove publisher names at the start, if we can
             for word in publisher_words:
                 #Try and compare
@@ -63,11 +73,82 @@ def device(request, device_uid):
                     publisher = word
                     replaced_name = name.replace(word, "").strip()
                     #Products with a single name, e.g. Evernote by Evernote
-                    if replaced_name != "":
+                    if len(replaced_name) > 5: #Less than 3 characters
                         name = replaced_name
 
+            if name == publisher + "t":
+                name = publisher
 
-        #Add software to the database now
+            publisher = publisher.strip().replace(" ", "_")
+            name = name.strip().replace(" ", "_")
+
+            out = publisher +" - " + name + " - " + version
+
+            try:
+                #Try to do stuff
+                unique_apps[out] = App(publisher, name, version, software["name"]) 
+            except KeyError:
+                unique_apps[out] = App(publisher, name, version, software["name"])
+
+        for key in sorted(unique_apps.keys(), key=lambda x: unique_apps[x].publisher):
+            app = unique_apps[key]
+            out = key
+
+            matched = False
+
+            non_match = Cpe.objects.filter(Q(product=app.name), ~Q(product=app.name, version=app.version))
+            matches = Cpe.objects.filter(product=app.name, version=app.version)
+            if matches.count() > 0:
+                matched = True
+                out += " VULNERABLE"
+                unsafe += 1
+            if non_match.count() > 0 and matches.count() == 0:
+                matched = True
+                out += " SAFE"
+                safe += 1
+
+            close = Cpe.objects.filter(vendor=app.publisher, product__contains=app.name)
+            close_match = Cpe.objects.filter(vendor=app.publisher, product__contains=app.name, version=app.version)
+            if close.count() > 0 and matches.count() == 0 and non_match.count() == 0:
+                matched = True
+                out +="SAFE"
+                safe += 1
+            if close_match.count() > 0 and close.count() == 0 and matches.count() == 0 and non_match.count() == 0:
+                matched = True
+                out += " VULNERABLE"
+                unsafe += 1
+
+            if not matched:
+                prods = Cpe.objects.filter(version__contains=app.version)
+                for prod in prods:
+                    if prod.product.replace("_", " ") in app.title.lower():
+                        matched = True
+                        out += " SIMILAR-------------- " + prod.product
+                        similar += 1
+                    else:
+                        try:
+                            dist = fuzz.token_set_ratio(prod.product.decode("unicode_escape"), app.title)
+                        except UnicodeEncodeError:
+                            dist = 0
+                    
+                        if dist > 80:
+                            matched = True
+                            out += " SIMILAR" + "---------------" + prod.product
+                            similar += 1
+                
+            if matched:
+                print out
+                    
+
+
+
+        print safe, "safe"
+        print unsafe, "unsafe"
+        print similar, "similar"
+        print len(unique_apps), "total"
+        
+
+
 
     response = HttpResponse(device_uid)
     response["Access-Control-Allow-Origin"] = "*"
@@ -75,6 +156,13 @@ def device(request, device_uid):
     response["Access-Control-Max-Age"] = "1000"
     response["Access-Control-Allow-Headers"] = "*"
     return response
+
+class App:
+    def __init__(self, vendor, name, version, title):
+        self.name = name
+        self.publisher = vendor
+        self.version = version
+        self.title = title
 
 def add_device(request):
     render_dict = {}
