@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Add Device{% endblock %}
+
+{% block pagetitle %}Add Device{% endblock %}
+
+{% block content %}
+            <div class="row">
+                <div class="col-lg-12">
+                    {% if success %}
+                        <div class="alert alert-success alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            New device added successfully
+                        </div>
+                    {% endif %}
+                    <form action="/add_device" method="post">
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        {% for field in form %}
+                            <div class="form-group">
+                                {{ field.errors }}
+                                <label>{{ field.label_tag }}</label><br />
+                                    {{ field }}
+                                    <p class="help-block">{{ field.help_text }}</p>
+                            </div>
+                        {% endfor %}
+                        <input type="submit" value="Add New Device" class="btn btn-primary" />
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+{% endblock %}
