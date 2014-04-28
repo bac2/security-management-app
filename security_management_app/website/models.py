@@ -8,8 +8,12 @@ class Device(models.Model):
     uid = models.CharField(max_length=50,unique=True)
     os = models.CharField(max_length=50, default="Unknown")
     nickname = models.CharField(max_length=50) #User can add a memorable name to a device?
+    last_updated = models.DateTimeField()
 
     nickname.blank = True
+    nickname.null = True
+    last_updated.blank = True
+    last_updated.null = True
 
     def __unicode__(self):
         if self.nickname is not None:
@@ -66,11 +70,8 @@ class Application(models.Model):
 
 class DeviceUpdate(models.Model):
     device = models.ForeignKey(Device)
-    application = models.ForeignKey(Application)
-    version = models.CharField(max_length=50)
-
+    date = models.DateTimeField()
 
 class UpdateApplications(models.Model):
-    device = models.ForeignKey(Device)
+    update = models.ForeignKey(DeviceUpdate)
     application = models.ForeignKey(Application)
-    version = models.CharField(max_length=100)

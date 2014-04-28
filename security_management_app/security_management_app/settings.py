@@ -39,6 +39,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'website',
+    'registration',
+    'south'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -54,7 +56,8 @@ ROOT_URLCONF = 'security_management_app.urls'
 
 WSGI_APPLICATION = 'security_management_app.wsgi.application'
 
-TEMPLATE_DIRS = ('/Users/nick/GitRepositories/security-management-app/security_management_app/templates',)
+
+TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
@@ -92,3 +95,4 @@ STATICFILES_DIRS = (
 
 # django-registration settings
 ACCOUNT_ACTIVATION_DAYS = 7
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
