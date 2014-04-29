@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import *
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max, Q
+from django.core import serializers
 from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference
 from forms import AddDeviceForm
 from vuln_search import find_vulnerabilities
@@ -23,10 +24,12 @@ def device_list(request):
     safe_devices = []
     vulnerable_devices = []
     no_data_devices = []
-    vulnerabilities = {}
+    vuln_dict = {}
     severities = {}
+    devices = False
     if account_devices:
         max_cvss = 0
+        devices = True
         for device in account_devices:
             try:
                 update  = DeviceUpdate.objects.filter(device=device).latest("date")
@@ -34,7 +37,7 @@ def device_list(request):
                 vulnerabilities = find_vulnerabilities(software)
                 if vulnerabilities:
                     vulnerable_devices.append(device)
-                    vulnerabilities[device] = vulnerabilities
+                    vuln_dict[device] = vulnerabilities
                     for vuln in vulnerabilities:
                         if vuln.score > max_cvss:
                             max_cvss = vuln.score
@@ -42,7 +45,7 @@ def device_list(request):
             except:
                 no_data_devices.append(device)
 
-    return render_to_response("devices.html", {"safe_devices": safe_devices, "vulnerable_devices": vulnerable_devices, "no_data_devices": no_data_devices, "vulnerabilities": vulnerabilities, "severities": severities})
+    return render_to_response("devices.html", {"devices": devices, "safe_devices": safe_devices, "vulnerable_devices": vulnerable_devices, "no_data_devices": no_data_devices, "vulnerabilities": vulnerabilities, "severities": severities})
 
 @login_required
 def device(request, device_uid):
@@ -64,6 +67,21 @@ def device(request, device_uid):
         vulnerabilities = None
 
     return render_to_response("device.html", {"device": device, "vulnerabilities": vulnerabilities})
+
+@login_required
+def graph_data(request):
+    account_devices = Device.objects.filter(owner=request.user)
+    for device in account_devices:
+        try:
+            update  = DeviceUpdate.objects.filter(device=device).latest("date")
+            software = UpdateApplications.objects.filter(update=update)
+            vulnerabilities = find_vulnerabilities(software)
+            if vulnerabilities:
+                device.vulnerabilities = vulnerabilities
+        except:
+            pass
+    jsondata = serializers.serialize('json', account_devices)
+    return HttpReponse(jsondata,mimetype='application/json')
 
 #Handles devices sending their software lists
 @csrf_exempt
