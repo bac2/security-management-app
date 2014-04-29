@@ -7,85 +7,135 @@
 {% block content %}
             <div class="row">
                 <div class="col-lg-12">
-                   <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h5>List of insecure devices</h5>
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Device</th>
-                                            <th>Status</th>
-                                            <th>Highest CVSS Score <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
-                                            <th>Last Updated</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="danger">
-                                            <td>1</td>
-                                            <td>Office Android</td>
-                                            <td>High risk vulnerabilities detected - act now!</td>
-                                            <td>10.0</td>
-                                            <td>2014-04-22 11:59:32</td>
-                                        </tr>
-                                        <tr class="warning">
-                                            <td>2</td>
-                                            <td>Office Laptop</td>
-                                            <td>Low-risk vulnerabilities detected</td>
-                                            <td>4.5</td>
-                                            <td>2014-04-22 11:59:32</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                   {% if vulnerable_devices %}
+                       <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5>List of insecure devices</h5>
                             </div>
-                            <!-- /.table-responsive -->
-                        </div>
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h5>Devices with no known vulnerabilities</h5>
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Device</th>
-                                            <th>Status</th>
-                                            <th>Last Updated</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="success">
-                                            <td>3</td>
-                                            <td>Office Desktop</td>
-                                            <td>No known vulnerabilities</td>
-                                            <td>2014-04-22 11:59:32</td>
-                                        </tr>
-                                        <tr class="success">
-                                            <td>4</td>
-                                            <td>Office Server</td>
-                                            <td>No known vulnerabilities</td>
-                                            <td>2014-04-22 11:59:32</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Device UID</th>
+                                                <th>Device Nickname</th>
+                                                <th>Status</th>
+                                                <th>Highest CVSS Score <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
+                                                <th>Last Updated</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for device in insecure_devices %}
+                                                {% if severities.device > 5 %}
+                                                    <tr class="danger">
+                                                        <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
+                                                        <td>{{ device.nickname }}</td>
+                                                        <td>High risk vulnerabilities detected - act now!</td>
+                                                        <td>{{ severities.cvss }}</td>
+                                                        {% if device.last_updated %}
+                                                            <td>{{ device.last_updated }}</td>
+                                                        {% else %}
+                                                            <td>No data uploaded</td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% else %}
+                                                    <tr class="warning">
+                                                        <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
+                                                        <td>{{ device.nickname }}</td>
+                                                        <td>Low risk vulnerabilities detected</td>
+                                                        <td>{{ severities.cvss }}</td>
+                                                        {% if device.last_updated %}
+                                                            <td>{{ device.last_updated }}</td>
+                                                        {% else %}
+                                                            <td>No data uploaded</td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /.table-responsive -->
                             </div>
-                            <!-- /.table-responsive -->
+                            <!-- /.panel-body -->
                         </div>
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
+                        <!-- /.panel -->
+                    {% endif %}
+                    {% if safe_devices %}
+                        <div class="panel panel-success">
+                            <div class="panel-heading">
+                                <h5>Devices with no known vulnerabilities</h5>
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Device UID</th>
+                                                <th>Device Nickname</th>
+                                                <th>Status</th>
+                                                <th>Last Updated</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for device in safe_devices %}
+                                                <tr class="success">
+                                                    <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
+                                                    <td>{{ device.nickname }}</td>
+                                                    <td>No known vulnerabilities</td>
+                                                    {% if device.last_updated %}
+                                                        <td>{{ device.last_updated }}</td>
+                                                    {% else %}
+                                                        <td>No data uploaded</td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel -->
+                    {% endif %}
+                    {% if no_data_devices %}
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                <h5>Devices with no data</h5>
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>UID</th>
+                                                <th>Device Nickname</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for device in no_data_devices %}
+                                                <tr class="info">
+                                                    <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
+                                                    <td>{{ device.nickname }}</td>
+                                                    <td>No data received from device</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /.table-responsive -->
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel -->
+                    {% endif %}
                 </div>
-                <!-- /.col-lg-8 -->
+                <!-- /.col-lg-12 -->
             </div>
             <!-- /.row -->
 {% endblock %}

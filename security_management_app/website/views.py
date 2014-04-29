@@ -3,11 +3,8 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import *
 from django.contrib.auth.decorators import login_required
-from django.db.models import Max
-from django.db.models import Q
-
-from models import Device, DeviceUpdate, UpdateApplications
-from models import Device, Cpe
+from django.db.models import Max, Q
+from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference
 from forms import AddDeviceForm
 from vuln_search import find_vulnerabilities
 
@@ -20,10 +17,34 @@ import string
 def index(request):
     return render_to_response("dashboard.html")
 
+@login_required
 def device_list(request):
     account_devices = Device.objects.filter(owner=request.user)
-    return render_to_response("devices.html", {"safe_devices": account_devices})
+    safe_devices = []
+    vulnerable_devices = []
+    no_data_devices = []
+    vulnerabilities = {}
+    severities = {}
+    if account_devices:
+        max_cvss = 0
+        for device in account_devices:
+            try:
+                update  = DeviceUpdate.objects.filter(device=device).latest("date")
+                software = UpdateApplications.objects.filter(update=update)
+                vulnerabilities = find_vulnerabilities(software)
+                if vulnerabilities:
+                    vulnerable_devices.append(device)
+                    vulnerabilities[device] = vulnerabilities
+                    for vuln in vulnerabilities:
+                        if vuln.score > max_cvss:
+                            max_cvss = vuln.score
+                    severities[device] = max_cvss
+            except:
+                no_data_devices.append(device)
 
+    return render_to_response("devices.html", {"safe_devices": safe_devices, "vulnerable_devices": vulnerable_devices, "no_data_devices": no_data_devices, "vulnerabilities": vulnerabilities, "severities": severities})
+
+@login_required
 def device(request, device_uid):
     try:
         device = Device.objects.get(uid=device_uid)
@@ -33,6 +54,12 @@ def device(request, device_uid):
         update  = DeviceUpdate.objects.filter(device=device).latest("date")
         software = UpdateApplications.objects.filter(update=update)
         vulnerabilities = find_vulnerabilities(software)
+        for vuln in vulnerabilities:
+            try:
+                references = Reference.objects.get(vulnerability=vuln)
+            except:
+                references = None
+            vuln.references = references
     except:
         vulnerabilities = None
 
@@ -106,7 +133,7 @@ def device_update(request, device_uid):
 
             try:
                 #Try to do stuff
-                unique_apps[out] = App(publisher, name, version, software["name"]) 
+                unique_apps[out] = App(publisher, name, version, software["name"])
             except KeyError:
                 unique_apps[out] = App(publisher, name, version, software["name"])
 
@@ -150,15 +177,15 @@ def device_update(request, device_uid):
                             dist = fuzz.token_set_ratio(prod.product.decode("unicode_escape"), app.title)
                         except UnicodeEncodeError:
                             dist = 0
-                    
+
                         if dist > 80:
                             matched = True
                             out += " SIMILAR" + "---------------" + prod.product
                             similar += 1
-                
+
             if matched:
                 print out
-                    
+
 
 
 
@@ -166,7 +193,7 @@ def device_update(request, device_uid):
         print unsafe, "unsafe"
         print similar, "similar"
         print len(unique_apps), "total"
-        
+
 
 
 

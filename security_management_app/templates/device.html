@@ -1,70 +1,67 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}
+    {% if device.nickname %}
+        Device - {{ device.nickname }}
+    {% else %}
+        Device - {{ device.uid }}
+    {% endif %}
+{% endblock %}
 
-{% block pagetitle %}Dashboard{% endblock %}
+{% block pagetitle %}
+    {% if device.nickname %}
+        Device - {{ device.nickname }}
+    {% else %}
+        Device - {{ device.uid }}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="panel panel-default">
+                    <div class="panel panel-default {% if vulnerabilities %}panel-danger{% else %}panel-success{% endif %}">
                         <div class="panel-heading">
                             Vulnerability List
                         </div>
                         <div class="panel-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Application</th>
-                                            <th>Version</th>
-                                            <th>Vulnerability Name</th>
-                                            <th>CVSS Score <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="danger">
-                                            <td>1</td>
-                                            <td><a href="#vuln1">Adobe Reader</a></td>
-                                            <td>11.0.1</td>
-                                            <td>Remote Code Execution</td>
-                                            <td>10.0</td>
-                                        </tr>
-                                        <tr class="danger">
-                                            <td>2</td>
-                                            <td><a href="#vuln2">Microsoft Office</a></td>
-                                            <td>2007</td>
-                                            <td>Remote Code Execution</td>
-                                            <td>9.5</td>
-                                        </tr>
-                                        <tr class="danger">
-                                            <td>1</td>
-                                            <td><a href="#vuln3">Adobe Acrobat</a></td>
-                                            <td>11.0.1</td>
-                                            <td>Denial of Service</td>
-                                            <td>8.0</td>
-                                        </tr>
-                                        <tr class="warning">
-                                            <td>2</td>
-                                            <td><a href="#vuln4">Microsoft Visio</a></td>
-                                            <td>2010</td>
-                                            <td>Privilege Escalation</td>
-                                            <td>4.5</td>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- /.table-responsive -->
+                            {% if vulnerabilities %}
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Application</th>
+                                                <th>Version</th>
+                                                <th>CVE Number</th>
+                                                <th>CVSS Score <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for vulnerability in vulnerabilities %}
+                                            <tr class="{% if vulnerability.score > 5 %}danger{% else %}warning{% endif %}">
+                                                <td><a href="#{{ vulnerability.cve }}">{{ vulnerability.cpe.product }}</a></td>
+                                                <td>{{ vulnerability.cpe.version }}</td>
+                                                <td>{{ vulnerability.cve }}</td>
+                                                <td>{{ vulnerability.score }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /.table-responsive -->
+                            {% else %}
+                                <h1>No vulnerabilities detected</h1>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
             <!-- /.row -->
+            {% for vuln in vulnerabilities %}
             <div class="row">
                 <div id="vuln1" class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Adobe Reader - Remote Code Execution
+                            {{ vuln.cve }}
                         </div>
                         <!-- .panel-heading -->
                         <div class="panel-body">
@@ -77,7 +74,7 @@
                                     </div>
                                     <div id="collapseOne1" class="panel-collapse collapse in">
                                         <div class="panel-body">
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                            {{ vuln.summary }}
                                         </div>
                                     </div>
                                 </div>
@@ -90,10 +87,9 @@
                                     <div id="collapseTwo1" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <ul>
+                                                {% for reference in vuln.references %}
                                                 <li><a href="http://google.com">Reference Number 1</a></li>
-                                                <li><a href="http://google.com">Reference Number 2</a></li>
-                                                <li><a href="http://google.com">Reference Number 3</a></li>
-                                                <li><a href="http://google.com">Reference Number 4</a></li>
+                                                {% endfor %}
                                             </ul>
                                         </div>
                                     </div>
@@ -107,145 +103,6 @@
                 <!-- /.col-lg-12 -->
             </div>
             <!-- /.row -->
-            <div class="row">
-                <div id="vuln2" class="col-lg-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Microsoft Office - Remote Code Execution
-                        </div>
-                        <!-- .panel-heading -->
-                        <div class="panel-body">
-                            <div class="panel-group" id="accordion2">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion2" href="#collapseOne2">Vulnerability Description</a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseOne2" class="panel-collapse collapse in">
-                                        <div class="panel-body">
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo2">Links to Remediation Information</a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseTwo2" class="panel-collapse collapse">
-                                        <div class="panel-body">
-                                            <ul>
-                                                <li><a href="http://google.com">Reference Number 1</a></li>
-                                                <li><a href="http://google.com">Reference Number 2</a></li>
-                                                <li><a href="http://google.com">Reference Number 3</a></li>
-                                                <li><a href="http://google.com">Reference Number 4</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- .panel-body -->
-                    </div>
-                    <!-- /.panel -->
-                </div>
-                <!-- /.col-lg-12 -->
-            </div>
-            <!-- /.row -->
-            <div class="row">
-                <div id="vuln3" class="col-lg-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Adobe Acrobat - Denial of Service
-                        </div>
-                        <!-- .panel-heading -->
-                        <div class="panel-body">
-                            <div class="panel-group" id="accordion3">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion3" href="#collapseOne3">Vulnerability Description</a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseOne3" class="panel-collapse collapse in">
-                                        <div class="panel-body">
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion3" href="#collapseTwo3">Links to Remediation Information</a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseTwo3" class="panel-collapse collapse">
-                                        <div class="panel-body">
-                                            <ul>
-                                                <li><a href="http://google.com">Reference Number 1</a></li>
-                                                <li><a href="http://google.com">Reference Number 2</a></li>
-                                                <li><a href="http://google.com">Reference Number 3</a></li>
-                                                <li><a href="http://google.com">Reference Number 4</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- .panel-body -->
-                    </div>
-                    <!-- /.panel -->
-                </div>
-                <!-- /.col-lg-12 -->
-            </div>
-            <!-- /.row -->
-            <div class="row">
-                <div id="vuln4" class="col-lg-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Microsoft Visio - Privilege Escalation
-                        </div>
-                        <!-- .panel-heading -->
-                        <div class="panel-body">
-                            <div class="panel-group" id="accordion4">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion4" href="#collapseOne4">Vulnerability Description</a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseOne4" class="panel-collapse collapse in">
-                                        <div class="panel-body">
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordion4" href="#collapseTwo4">Links to Remediation Information</a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseTwo4" class="panel-collapse collapse">
-                                        <div class="panel-body">
-                                            <ul>
-                                                <li><a href="http://google.com">Reference Number 1</a></li>
-                                                <li><a href="http://google.com">Reference Number 2</a></li>
-                                                <li><a href="http://google.com">Reference Number 3</a></li>
-                                                <li><a href="http://google.com">Reference Number 4</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- .panel-body -->
-                    </div>
-                    <!-- /.panel -->
-                </div>
-                <!-- /.col-lg-12 -->
-            </div>
-            <!-- /.row -->
+            {% endfor %}
+
 {% endblock %}
