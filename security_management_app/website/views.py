@@ -4,13 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import *
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max, Q
-<<<<<<< Updated upstream
-from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference
-=======
-
-from models import Device, DeviceUpdate, UpdateApplications
-from models import Device, Cpe, Application
->>>>>>> Stashed changes
+from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference, Application
 from forms import AddDeviceForm
 
 #from vuln_search import find_vulnerabilities
