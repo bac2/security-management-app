@@ -1,21 +1,21 @@
-var margin = {top: 20, right: 20, bottom: 20, left: 60},
+var margin = {top: 30, right: 20, bottom: 20, left: 80},
     width = 400 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 var y1 = d3.scale.ordinal()
-    .rangeRoundBands([0, height], .1);
+    .rangeRoundBands([margin.top, height], .1);
 	
 var y2 = d3.scale.ordinal()
-    .rangeRoundBands([0, height], .1);
+    .rangeRoundBands([margin.top, height], .1);
 
 var y3 = d3.scale.ordinal()
-    .rangeRoundBands([0, height], .1);	
+    .rangeRoundBands([margin.top, height], .1);	
 	
 var y4 = d3.scale.ordinal()
-    .rangeRoundBands([0, height], .1);
+    .rangeRoundBands([margin.top, height], .1);
 	
 var y5 = d3.scale.ordinal()
-    .rangeRoundBands([0, height], .1);	
+    .rangeRoundBands([margin.top, height], .1);	
 	
 var x1 = d3.scale.linear()
     .range([0, width]);
@@ -35,26 +35,31 @@ var x5 = d3.scale.linear()
 var xAxis1 = d3.svg.axis()
     .scale(x1)
     .orient("top")
+	.tickFormat(d3.format("d"))
 	.ticks(5);
 	
 var xAxis2 = d3.svg.axis()
     .scale(x2)
     .orient("top")
+	.tickFormat(d3.format("d"))
 	.ticks(5);
 
 var xAxis3 = d3.svg.axis()
     .scale(x3)
     .orient("top")
+	.tickFormat(d3.format("d"))
 	.ticks(5);
 	
 var xAxis4 = d3.svg.axis()
     .scale(x4)
     .orient("top")
+	.tickFormat(d3.format("d"))
 	.ticks(5);
 
 var xAxis5 = d3.svg.axis()
     .scale(x5)
     .orient("top")
+	.tickFormat(d3.format("d"))
 	.ticks(5);	
 
 var yAxis1 = d3.svg.axis()
@@ -134,6 +139,8 @@ d3.json("/dashboarddata", function(error, data){
 	var filter = { uid : [], os : [], cve : [], severity : [], maxSeverity : [] }	
 	
 	//Number of Devices by OS
+	svg1.append("text")
+		.text("Devices by OS");
 	svg1.selectAll(".bar")
 		.data(g1_data)
 	.enter().append("rect")
@@ -163,22 +170,24 @@ d3.json("/dashboarddata", function(error, data){
 			redraw();
 		});		
 	
+	svg2.append("text")
+		.text("Vulnerabilities by Machine");
 	svg2.selectAll(".bar")
 		.data(g2_data)
 	.enter().append("rect")
 		.attr("class", "bar")
-		.attr("y", function(d) { return y2(d.uid); })
+		.attr("y", function(d) { return y2(d.nickname); })
 		.attr("height", function(d) { return y2.rangeBand(); })
 		.attr("x", 0)
 		.attr("width", function(d) { return x2(d.count); })
 		.attr("fill", "steelblue")		
 		.on("click", function(d) {
-			var position = filter["uid"].indexOf(d.uid);
+			var position = filter["uid"].indexOf(d.nickname);
 			if (position === -1){
 				if (filter["uid"].length === 0){
 					svg2.selectAll("rect").attr("opacity", "0.5");
 				}			
-				filter["uid"].push(d.uid);
+				filter["uid"].push(d.nickname);
 				d3.select(this).attr("opacity", "1");				
 			}
 			else {
@@ -190,8 +199,10 @@ d3.json("/dashboarddata", function(error, data){
 				}				
 			}
 			redraw();
-		});				
+		});
 		
+	svg3.append("text")
+		.text("Vulnerabilities by Severity");
 	svg3.selectAll(".bar")
 		.data(g3_data)
 	.enter().append("rect")
@@ -227,6 +238,8 @@ d3.json("/dashboarddata", function(error, data){
 		});			
 		
 
+	svg4.append("text")
+		.text("Devices By Max Severity");
 	svg4.selectAll(".bar")
 		.data(g4_data)
 	.enter().append("rect")
@@ -261,6 +274,8 @@ d3.json("/dashboarddata", function(error, data){
 			redraw();
 		});				
 		
+	svg5.append("text")
+		.text("Devices by Vulnerability");
 	svg5.selectAll(".bar")
 		.data(g5_data)
 	.enter().append("rect")
@@ -427,9 +442,9 @@ d3.json("/dashboarddata", function(error, data){
 		new2.enter().append("rect")
 			.attr("class", "bar")
 			.on("click", function(d) {
-				var position = filter["uid"].indexOf(d.uid);
+				var position = filter["uid"].indexOf(d.nickname);
 				if (position === -1){
-					filter["uid"].push(d.uid);
+					filter["uid"].push(d.nickname);
 				}
 				else {
 					if ( ~position ) filter["uid"].splice(position, 1);
@@ -440,7 +455,7 @@ d3.json("/dashboarddata", function(error, data){
 		new2.transition()			
 			.duration(500)
 			.delay(200)
-			.attr("y", function(d) { return y2(d.uid); })
+			.attr("y", function(d) { return y2(d.nickname); })
 			.attr("height", function(d) { return y2.rangeBand(); })
 			.attr("x", 0)
 			.attr("width", function(d) { return x2(d.count); });
@@ -553,7 +568,7 @@ d3.json("/dashboarddata", function(error, data){
 	function g2(data){
 		var g2_data = [];
 		for (var i = 0; i < data.length; i++){
-			g2_data.push({uid : data[i].uid, count : data[i].vulnerability.length});
+			g2_data.push({nickname: data[i].nickname, uid : data[i].uid, count : data[i].vulnerability.length});
 		}
 		return g2_data;
 	}
@@ -660,7 +675,7 @@ d3.json("/dashboarddata", function(error, data){
 		x1.domain([0, d3.max(g1_data, function(d) { return d.count; })]);
 		y1.domain(g1_data.map(function(d) { return d.os; }));	
 		x2.domain([0, d3.max(g2_data, function(d) { return d.count; })]);
-		y2.domain(g2_data.map(function(d) { return d.uid; }));
+		y2.domain(g2_data.map(function(d) { return d.nickname; }));
 		x3.domain([0, d3.max(g3_data, function(d) { return d.count; })]);
 		y3.domain(g3_data.map(function(d) { return d.severity; }));
 		x4.domain([0, d3.max(g4_data, function(d) { return d.count; })]);
@@ -680,6 +695,7 @@ d3.json("/dashboarddata", function(error, data){
 	function appendAxis(){
 		svg1.append("g")
 			.attr("class", "x axis")
+			.attr("transform", "translate(0, "+margin.top+")")
 			.call(xAxis1);
 		svg1.append("g")
 			.attr("class", "y axis")
@@ -687,6 +703,7 @@ d3.json("/dashboarddata", function(error, data){
 			
 		svg2.append("g")
 			.attr("class", "x axis")
+			.attr("transform", "translate(0, "+margin.top+")")
 			.call(xAxis2);
 		svg2.append("g")
 			.attr("class", "y axis")
@@ -694,6 +711,7 @@ d3.json("/dashboarddata", function(error, data){
 			
 		svg3.append("g")
 			.attr("class", "x axis")
+			.attr("transform", "translate(0, "+margin.top+")")
 			.call(xAxis3);
 		svg3.append("g")
 			.attr("class", "y axis")
@@ -701,6 +719,7 @@ d3.json("/dashboarddata", function(error, data){
 			
 		svg4.append("g")
 			.attr("class", "x axis")
+			.attr("transform", "translate(0, "+margin.top+")")
 			.call(xAxis4);
 		svg4.append("g")
 			.attr("class", "y axis")
@@ -708,6 +727,7 @@ d3.json("/dashboarddata", function(error, data){
 			
 		svg5.append("g")
 			.attr("class", "x axis")
+			.attr("transform", "translate(0, "+margin.top+")")
 			.call(xAxis5);
 		svg5.append("g")
 			.attr("class", "y axis")
