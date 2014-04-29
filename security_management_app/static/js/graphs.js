@@ -338,15 +338,15 @@ d3.json("/dashboarddata", function(error, data){
 			for (var j = 0; j < filter.severity.length; j++){
 				for (var k = 0; k < data[i]["vulnerability"].length; k++){
 					var score = data[i]["vulnerability"][k]["score"];
-					var severity = "unknown";
+					var severity = "Unknown";
 					if (0 <= score && score <= 3.9){
-						severity = "low";
+						severity = "Low";
 					}
 					else if (4.0 <= score && score <= 6.9){
-						severity = "medium";
+						severity = "Medium";
 					}
 					else if (7.0 <= score && score <= 10.0){
-						severity = "high";
+						severity = "High";
 					}		
 					if (severity === filter.severity[j]){ allowed = true; }	
 				}				
@@ -362,15 +362,15 @@ d3.json("/dashboarddata", function(error, data){
 						maxSeverity = data[i]["vulnerability"][k]["score"];
 					}
 				}
-				var severity = "unknown";
+				var severity = "Unknown";
 				if (0 <= maxSeverity && maxSeverity <= 3.9){
-					severity = "low";
+					severity = "Low";
 				}
 				else if (4.0 <= maxSeverity && maxSeverity <= 6.9){
-					severity = "medium";
+					severity = "Medium";
 				}
 				else if (7.0 <= maxSeverity && maxSeverity <= 10.0){
-					severity = "high";
+					severity = "High";
 				}		
 				if (severity === filter.maxSeverity[j]){ allowed = true; }						
 			}					
@@ -414,16 +414,24 @@ d3.json("/dashboarddata", function(error, data){
 			
 		new1.enter().append("rect")
 			.attr("class", "bar")
-			.on("click", function(d) {
-				console.log(d);
+			.on("click", function(d) {				
 				var position = filter["os"].indexOf(d.os);
 				if (position === -1){
-					filter["os"].push(d.os);
+					if (filter["os"].length === 0){
+						svg1.selectAll("rect").attr("opacity", "0.5");
+					}
+					filter["os"].push(d.os);				
+					d3.select(this).attr("opacity", "1");
 				}
 				else {
 					if ( ~position ) filter["os"].splice(position, 1);
+					if (filter["os"].length === 0){
+						svg1.selectAll("rect").attr("opacity", "1");
+					} else {
+						d3.select(this).attr("opacity", "0.5");
+					}
 				}
-				redraw("g1");
+				redraw();
 			});
 		
 		new1.transition()			
@@ -444,13 +452,22 @@ d3.json("/dashboarddata", function(error, data){
 			.on("click", function(d) {
 				var position = filter["uid"].indexOf(d.nickname);
 				if (position === -1){
+					if (filter["uid"].length === 0){
+						svg2.selectAll("rect").attr("opacity", "0.5");
+					}			
 					filter["uid"].push(d.nickname);
+					d3.select(this).attr("opacity", "1");				
 				}
 				else {
 					if ( ~position ) filter["uid"].splice(position, 1);
+					if (filter["uid"].length === 0){
+						svg2.selectAll("rect").attr("opacity", "1");
+					} else {
+						d3.select(this).attr("opacity", "0.5");
+					}				
 				}
-				redraw("g2");
-			});	
+				redraw();
+			});
 		
 		new2.transition()			
 			.duration(500)
@@ -470,12 +487,21 @@ d3.json("/dashboarddata", function(error, data){
 			.on("click", function(d) {
 				var position = filter["severity"].indexOf(d.severity);
 				if (position === -1){
+					if (filter["severity"].length === 0){
+						svg3.selectAll("rect").attr("opacity", "0.5");
+					}			
 					filter["severity"].push(d.severity);
+					d3.select(this).attr("opacity", "1");	
 				}
 				else {
 					if ( ~position ) filter["severity"].splice(position, 1);
+					if (filter["severity"].length === 0){
+						svg3.selectAll("rect").attr("opacity", "1");
+					} else {
+						d3.select(this).attr("opacity", "0.5");
+					}						
 				}
-				redraw("g3");
+				redraw();
 			});		
 		
 		new3.transition()			
@@ -494,14 +520,23 @@ d3.json("/dashboarddata", function(error, data){
 		new4.enter().append("rect")
 			.attr("class", "bar")
 			.on("click", function(d) {
-				var position = filter["severity"].indexOf(d.severity);
+				var position = filter["maxSeverity"].indexOf(d.severity);
 				if (position === -1){
-					filter["severity"].push(d.severity);
+					if (filter["maxSeverity"].length === 0){
+						svg4.selectAll("rect").attr("opacity", "0.5");
+					}			
+					filter["maxSeverity"].push(d.severity);
+					d3.select(this).attr("opacity", "1");		
 				}
 				else {
-					if ( ~position ) filter["severity"].splice(position, 1);
+					if ( ~position ) filter["maxSeverity"].splice(position, 1);
+					if (filter["maxSeverity"].length === 0){
+						svg4.selectAll("rect").attr("opacity", "1");
+					} else {
+						d3.select(this).attr("opacity", "0.5");
+					}				
 				}
-				redraw("g4");
+				redraw();
 			});		
 		
 		new4.transition()			
@@ -522,13 +557,22 @@ d3.json("/dashboarddata", function(error, data){
 			.on("click", function(d) {
 				var position = filter["cve"].indexOf(d.cve);
 				if (position === -1){
+					if (filter["cve"].length === 0){
+						svg5.selectAll("rect").attr("opacity", "0.5");
+					}			
 					filter["cve"].push(d.cve);
+					d3.select(this).attr("opacity", "1");					
 				}
 				else {
 					if ( ~position ) filter["cve"].splice(position, 1);
+					if (filter["cve"].length === 0){
+						svg5.selectAll("rect").attr("opacity", "1");
+					} else {
+						d3.select(this).attr("opacity", "0.5");
+					}						
 				}
-				redraw("g5");
-			});
+				redraw();
+			});		
 		
 		new5.transition()			
 			.duration(500)
@@ -580,15 +624,15 @@ d3.json("/dashboarddata", function(error, data){
 		
 		for (var i = 0; i < data.length; i++){			
 			data[i]["vulnerability"].map(function (item) {
-				var severity = "unknown";
+				var severity = "Unknown";
 				if (0 <= item.score && item.score <= 3.9){
-					severity = "low";
+					severity = "Low";
 				}
 				else if (4.0 <= item.score && item.score <= 6.9){
-					severity = "medium";
+					severity = "Medium";
 				}
 				else if (7.0 <= item.score && item.score <= 10.0){
-					severity = "high";
+					severity = "High";
 				}
 				if (severityCount.hasOwnProperty(severity)) {
 					severityCount[severity] += 1;
@@ -620,15 +664,15 @@ d3.json("/dashboarddata", function(error, data){
 					maxSeverity = data[i]["vulnerability"][j]["score"];
 				}
 			}
-			var severity = "unknown";
+			var severity = "Unknown";
 			if (0 <= maxSeverity && maxSeverity <= 3.9){
-				severity = "low";
+				severity = "Low";
 			}
 			else if (4.0 <= maxSeverity && maxSeverity <= 6.9){
-				severity = "medium";
+				severity = "Medium";
 			}
 			else if (7.0 <= maxSeverity && maxSeverity <= 10.0){
-				severity = "high";
+				severity = "High";
 			}			
 			if (severityCount.hasOwnProperty(severity)) {
 				severityCount[severity] += 1;
