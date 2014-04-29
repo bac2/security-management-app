@@ -96,3 +96,9 @@ STATICFILES_DIRS = (
 # django-registration settings
 ACCOUNT_ACTIVATION_DAYS = 7
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.mailgun.org'
+EMAIL_HOST_USER = 'postmaster@vulmo.nojones.net'
+EMAIL_HOST_PASSWORD = '4vbjohv4apa5'
+EMAIL_PORT = 587

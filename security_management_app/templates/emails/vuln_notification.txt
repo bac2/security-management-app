@@ -1,0 +1,4 @@
+A vulnerability has been found in an application installed on one of the devices registered to your account. Please log into your account at http://vulmo.nojones.net to find the details.
+
+Device: {{ device }}
+Application: {{ application }}
