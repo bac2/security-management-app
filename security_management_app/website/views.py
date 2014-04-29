@@ -4,14 +4,22 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import *
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max, Q
+<<<<<<< Updated upstream
 from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference
+=======
+
+from models import Device, DeviceUpdate, UpdateApplications
+from models import Device, Cpe, Application
+>>>>>>> Stashed changes
 from forms import AddDeviceForm
-from vuln_search import find_vulnerabilities
+
+#from vuln_search import find_vulnerabilities
 
 import json
 from fuzzywuzzy import fuzz
 import re
 import string
+from datetime import datetime
 
 # Create your views here.
 def index(request):
@@ -149,10 +157,12 @@ def device_update(request, device_uid):
                 matched = True
                 out += " VULNERABLE"
                 unsafe += 1
+                app.cpe = matches[0]
             if non_match.count() > 0 and matches.count() == 0:
                 matched = True
                 out += " SAFE"
                 safe += 1
+                app.related_cpe = non_match[0]
 
             close = Cpe.objects.filter(vendor=app.publisher, product__contains=app.name)
             close_match = Cpe.objects.filter(vendor=app.publisher, product__contains=app.name, version=app.version)
@@ -160,10 +170,12 @@ def device_update(request, device_uid):
                 matched = True
                 out +="SAFE"
                 safe += 1
+                app.related_cpe = close[0]
             if close_match.count() > 0 and close.count() == 0 and matches.count() == 0 and non_match.count() == 0:
                 matched = True
                 out += " VULNERABLE"
                 unsafe += 1
+                app.cpe = close_match[0]
 
             if not matched:
                 prods = Cpe.objects.filter(version__contains=app.version)
@@ -172,6 +184,7 @@ def device_update(request, device_uid):
                         matched = True
                         out += " SIMILAR-------------- " + prod.product
                         similar += 1
+                        app.cpe = prod
                     else:
                         try:
                             dist = fuzz.token_set_ratio(prod.product.decode("unicode_escape"), app.title)
@@ -194,7 +207,46 @@ def device_update(request, device_uid):
         print similar, "similar"
         print len(unique_apps), "total"
 
+        #Add a new device update
+        d = DeviceUpdate(date=datetime.now(), device=device)
+        d.save()
 
+        #For each app, find if it has been added for this device
+        matched_apps = [ app for key,app in unique_apps.items() if app.cpe is not None]
+        for app in matched_apps:
+            #Attach to an application
+            #This shouldnt exist
+            newApp = Application(cpe=app.cpe)
+            newApp.save()
+
+            up = UpdateApplications(update=d, application=newApp)
+            up.save()
+
+        detected_apps = [ app for key,app in unique_apps.items() if app.related_cpe is not None]
+        for app in detected_apps:
+            #Make a new CPE from the related CPE
+            cpe = Cpe(  
+                        cpe=app.related_cpe.cpe + ":RELATED:" + app.version,
+                        part=app.related_cpe.part,
+                        vendor=app.related_cpe.vendor,
+                        product=app.related_cpe.product,
+                        version=app.version,
+                        update=app.related_cpe.update,
+                        edition=app.related_cpe.edition,
+                        language=app.related_cpe.language,
+                        sw_edition=app.related_cpe.sw_edition,
+                        target_sw=app.related_cpe.target_sw,
+                        target_hw=app.related_cpe.target_hw,
+                        other=app.related_cpe.other,
+                        title=app.related_cpe.title
+                    )
+            cpe.save()
+            #Create a new application
+            newApp = Application(cpe=cpe)
+            newApp.save()
+
+            upApp = UpdateApplications(update=d, application=newApp)
+            upApp.save()
 
 
     response = HttpResponse(device_uid)
@@ -210,6 +262,9 @@ class App:
         self.publisher = vendor
         self.version = version
         self.title = title
+        self.cpe = None
+        self.related_cpe = None
+
 
 @login_required
 def add_device(request):
