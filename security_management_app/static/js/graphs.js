@@ -77,31 +77,31 @@ var yAxis5 = d3.svg.axis()
     .scale(y5)
     .orient("left");	
 
-var svg1 = d3.select("body").append("svg")
+var svg1 = d3.select("#graphs").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var svg2 = d3.select("body").append("svg")
+var svg2 = d3.select("#graphs").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
-var svg3 = d3.select("body").append("svg")
+var svg3 = d3.select("#graphs").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
-var svg4 = d3.select("body").append("svg")
+var svg4 = d3.select("#graphs").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
-var svg5 = d3.select("body").append("svg")
+var svg5 = d3.select("#graphs").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -110,7 +110,17 @@ var svg5 = d3.select("body").append("svg")
 d3.json("/dashboarddata", function(error, data){
 	var selected = [];
 
-	var data = data["device"];
+
+	var devices = [];
+	for (var i=0; i < data.length; i+=1) {
+		devices.push(data[i]['fields']);
+		if (!data[i]['fields']['vulnerability']) {
+			data[i]['fields']['vulnerability'] = [];
+		}
+	}
+	data = {'device':devices}
+	
+	var data = data['device'];
 	
 	var g1_data = g1(data);
 	var g2_data = g2(data);
