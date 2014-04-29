@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Max, Q
 from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference, Application
 from forms import AddDeviceForm
+from vuln_search import find_vulnerabilities
 
 #from vuln_search import find_vulnerabilities
 
@@ -54,15 +55,16 @@ def device(request, device_uid):
         return HttpResponse("Device does not exist", status=404)
     try:
         update  = DeviceUpdate.objects.filter(device=device).latest("date")
-        software = UpdateApplications.objects.filter(update=update)
-        vulnerabilities = find_vulnerabilities(software)
+        software = Application.objects.filter(updateapplications__update=update)
+        vulnerabilities = find_vulnerabilities(update)
         for vuln in vulnerabilities:
             try:
                 references = Reference.objects.get(vulnerability=vuln)
             except:
                 references = None
             vuln.references = references
-    except:
+    except StandardError,e:
+        print e
         vulnerabilities = None
 
     return render_to_response("device.html", {"device": device, "vulnerabilities": vulnerabilities})
