@@ -5,7 +5,7 @@ from django.shortcuts import *
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max, Q
 from django.core import serializers
-from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference
+from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference, Vulnerability
 from models import Device, DeviceUpdate, UpdateApplications, Cpe, Reference, Application
 from forms import AddDeviceForm
 from vuln_search import find_vulnerabilities
@@ -67,6 +67,7 @@ def device_list(request):
                     for vuln in vulnerabilities:
                         if vuln.score > max_cvss:
                             max_cvss = vuln.score
+                    device.max_sev = max_cvss
                     severities[device] = max_cvss
                 else:
                     safe_devices.append(device)
@@ -104,20 +105,24 @@ def device(request, device_uid):
 
     return render_to_response("device.html", {"device": device, "vulnerabilities": vulnerabilities, 'safe_software':safe_software, 'vulnerable_software':vulnerable_software})
 
+
+class DeviceEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Device):
+            vulns = list(obj.vulnerabilities)
+            print "VULNS " + str(vulns)
+            return {'uid':obj.uid, 'nickname':obj.nickname, 'vulnerability':vulns, 'owner':obj.owner_id}
+        if isinstance(obj, Vulnerability):
+            return {'cve':obj.cve,'score':obj.score}
+
 @login_required
 def graph_data(request):
-    account_devices = Device.objects.filter(owner=request.user)
-    for device in account_devices:
-        try:
-            update  = DeviceUpdate.objects.filter(device=device).latest("date")
-            software = UpdateApplications.objects.filter(update=update)
-            vulnerabilities = find_vulnerabilities(software)
-            if vulnerabilities:
-                device.vulnerabilities = vulnerabilities
-        except:
-            pass
-    jsondata = serializers.serialize('json', account_devices)
-    return HttpResponse(jsondata,mimetype='application/json')
+    account_devices = list(Device.objects.filter(owner=request.user))
+    
+    jsondata = serializers.serialize('json', account_devices, fields=("nickname", "uid", "vulns", "owner"))
+
+    json_data = json.dumps(account_devices, cls=DeviceEncoder)
+    return HttpResponse(json_data,mimetype='application/json')
 
 #Handles devices sending their software lists
 @csrf_exempt

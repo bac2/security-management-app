@@ -28,12 +28,12 @@
                                             </thead>
                                             <tbody>
                                                 {% for device in vulnerable_devices %}
-                                                    {% if severities.device > 5 %}
+                                                    {% if device.max_sev > 5 %}
                                                         <tr class="danger">
                                                             <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
                                                             <td>{{ device.nickname }}</td>
                                                             <td>High risk vulnerabilities detected - act now!</td>
-                                                            <td>{{ severities.cvss }}</td>
+                                                            <td>{{ device.max_sev }}</td>
                                                             {% if device.last_updated %}
                                                                 <td>{{ device.last_updated }}</td>
                                                             {% else %}
@@ -44,7 +44,7 @@
                                                         <tr class="warning">
                                                             <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
                                                             <td>{{ device.nickname }}</td>
-                                                            <td>Low risk vulnerabilities detected</td>
+																														<td>{{severities.device}}DLow risk vulnerabilities detected</td>
                                                             <td>{{ severities.cvss }}</td>
                                                             {% if device.last_updated %}
                                                                 <td>{{ device.last_updated }}</td>

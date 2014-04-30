@@ -120,7 +120,7 @@ var svg5 = d3.select("#graphs").append("svg")
 d3.json("/dashboarddata", function(error, data){
 	var selected = [];
 
-
+/*
 	var devices = [];
 	for (var i=0; i < data.length; i+=1) {
 		devices.push(data[i]['fields']);
@@ -128,7 +128,8 @@ d3.json("/dashboarddata", function(error, data){
 			data[i]['fields']['vulnerability'] = [];
 		}
 	}
-	data = {'device':devices}
+ */
+	data = {'device':data}
 	
 	var data = data['device'];
 	
@@ -702,6 +703,14 @@ d3.json("/dashboarddata", function(error, data){
 		var g5_data = [];
 		
 		for (var i = 0; i < data.length; i++){			
+			data[i]["vulnerability"].sort(function (a, b) {
+				if (a.score != b.score) {
+
+					return b.score - a.score;
+				} else {
+					[a.score, b.score].sort();
+				}
+			});
 			data[i]["vulnerability"].map(function (item) {
 				if (cveCount.hasOwnProperty(item.cve)) {
 					cveCount[item.cve] += 1;
@@ -717,7 +726,9 @@ d3.json("/dashboarddata", function(error, data){
 				g5_data.push({ cve : key, count : cveCount[key]});
 			}				
 		}		
-		return g5_data;
+		return g5_data.slice(0, 5).sort(function (a,b) {
+				return b.cve.score - a.cve.score;
+		});
 	}
 	
 	function updateScales(){

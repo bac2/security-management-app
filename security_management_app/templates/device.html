@@ -38,7 +38,7 @@
                                         <tbody>
                                             {% for vulnerability in vulnerabilities %}
                                             <tr class="{% if vulnerability.score > 5 %}danger{% else %}warning{% endif %}">
-                                                <td><a href="#{{ vulnerability.cve }}">{{ vulnerability.cpe.product }}</a></td>
+                                                <td><a href="#{{ vulnerability.cve }}">{{ vulnerability.application.cpe.product }}</a></td>
                                                 <td>{{ vulnerability.cpe.version }}</td>
                                                 <td>{{ vulnerability.cve }}</td>
                                                 <td>{{ vulnerability.score }}</td>
