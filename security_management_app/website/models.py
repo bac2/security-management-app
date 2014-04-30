@@ -66,6 +66,9 @@ class Cpe(models.Model):
     other = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
 
+    def __unicode__(self):
+        return self.cpe
+
 
 class Application(models.Model):
     cpe = models.ForeignKey(Cpe)

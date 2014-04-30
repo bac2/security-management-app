@@ -1,4 +1,4 @@
-var margin = {top: 30, right: 20, bottom: 20, left: 80},
+var margin = {top: 30, right: 20, bottom: 20, left: 90},
     width = 400 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
@@ -652,6 +652,15 @@ d3.json("/dashboarddata", function(error, data){
 		for (var key in severityCount){
 			if (severityCount.hasOwnProperty(key)){
 				g3_data.push({ severity : key, count : severityCount[key]});
+				g3_data.sort(function (a, b) {
+					c = a.severity.charAt(a.severity.length-1);
+					d = b.severity.charAt(b.severity.length-1);
+					if (c < d) {
+							return -1;
+					} else {
+							return 1;
+						}
+				});
 			}				
 		}
 		

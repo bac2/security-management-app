@@ -65,7 +65,7 @@ def device_list(request):
                     vulnerable_devices.append(device)
                     vuln_dict[device] = vulnerabilities
                     for vuln in vulnerabilities:
-                        if vuln.score > max_cvss:
+                        if float(vuln.score) > float(max_cvss):
                             max_cvss = vuln.score
                     device.max_sev = max_cvss
                     severities[device] = max_cvss
@@ -86,12 +86,21 @@ def device(request, device_uid):
     try:
         update  = DeviceUpdate.objects.filter(device=device).latest("date")
         vuln_query = Q(vulnerability=None)
-        safe_software = Application.objects.filter(Q(updateapplications__update=update) and vuln_query)
-        vulnerable_software =  Application.objects.filter(Q(updateapplications__update=update) and ~vuln_query)
+        safe_software = Application.objects.filter(Q(updateapplications__update=update) & vuln_query)
+        vulnerable_software = Application.objects.filter(Q(updateapplications__update=update) & ~vuln_query)
+
+        for app in vulnerable_software:
+            max_score = 0
+            for vuln in app.vulnerability.all():
+                if float(vuln.score) > float(max_score):
+                    max_score = vuln.score
+
+            app.max_score = max_score
+
         vulnerabilities = find_vulnerabilities(update)
         for vuln in vulnerabilities:
             try:
-                references = Reference.objects.get(vulnerability=vuln)
+                references = Reference.objects.filter(vulnerability=vuln)
             except:
                 references = None
             vuln.references = references
@@ -111,7 +120,7 @@ class DeviceEncoder(json.JSONEncoder):
         if isinstance(obj, Device):
             vulns = list(obj.vulnerabilities)
             print "VULNS " + str(vulns)
-            return {'uid':obj.uid, 'nickname':obj.nickname, 'vulnerability':vulns, 'owner':obj.owner_id}
+            return {'uid':obj.uid, 'os':obj.os, 'nickname':obj.nickname, 'vulnerability':vulns, 'owner':obj.owner_id}
         if isinstance(obj, Vulnerability):
             return {'cve':obj.cve,'score':obj.score}
 
@@ -292,9 +301,11 @@ def device_update(request, device_uid):
                     )
             if created:
                 cpe.save()
-            #Create a new application
-            newApp = Application(cpe=cpe)
-            newApp.save()
+                #Create a new application
+                newApp = Application(cpe=cpe)
+                newApp.save()
+            else:
+                newApp = Application.objects.get(cpe=cpe)
 
             upApp = UpdateApplications(update=d, application=newApp)
             upApp.save()

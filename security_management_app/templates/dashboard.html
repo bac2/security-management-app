@@ -6,7 +6,7 @@
 
 {% block content %}
             <div class="row">
-                <div class="col-lg-8">
+                <div class="col-lg-12">
 									<div class="panel panel-{% if vulnerable %}danger{% else %}success{%endif%}">
                         <div class="panel-heading">
                             <h5>Account Status</h5>
@@ -74,7 +74,8 @@
 										{% endif %}
 
                 </div>
-                <!-- /.col-lg-8 -->
+                <!-- /.col-lg-12 -->
+								{% if False %}
                 <div class="col-lg-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -100,6 +101,7 @@
                         <!-- /.panel-body -->
                     </div>
                     <!-- /.panel -->
+										{% if False %}
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h5><i class="fa fa-bar-chart-o fa-fw"></i> Security News Feed</h5>
@@ -127,8 +129,10 @@
                         <!-- /.panel-body -->
                     </div>
                     <!-- /.panel -->
+										{% endif %}
                 </div>
                 <!-- /.col-lg-4 -->
+								{% endif %}
             </div>
             <!-- /.row -->
         </div>
