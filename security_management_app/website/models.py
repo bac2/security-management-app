@@ -65,8 +65,6 @@ class Cpe(models.Model):
 class Application(models.Model):
 	cpe = models.ForeignKey(Cpe)
 	vulnerability = models.ManyToManyField(Vulnerability)
-	def __unicode__(self):
-		return self.name
 
 class DeviceUpdate(models.Model):
     device = models.ForeignKey(Device)

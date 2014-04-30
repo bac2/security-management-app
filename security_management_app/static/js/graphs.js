@@ -2,6 +2,11 @@ var margin = {top: 30, right: 20, bottom: 20, left: 80},
     width = 400 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
+width = d3.select(d3.select("#graphs").node().parentNode).style("width");
+width = width.substring(0, width.length-2) / 3 - 10;
+width = width -margin.left - margin.right;
+height = width * 3/4;
+
 var y1 = d3.scale.ordinal()
     .rangeRoundBands([margin.top, height], .1);
 	

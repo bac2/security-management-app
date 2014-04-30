@@ -20,7 +20,23 @@ from datetime import datetime
 
 # Create your views here.
 def index(request):
-    return render_to_response("dashboard.html")
+    context = {}
+    if request.user.is_authenticated():
+        account_devices = Device.objects.filter(owner=request.user)
+        vulnerable = False
+        for device in account_devices:
+            update = DeviceUpdate.objects.filter(device=account_devices).latest("date")
+            vuln_query = Q(vulnerability=None)
+            safe_software = Application.objects.filter(Q(updateapplications__update=update) and vuln_query)
+            vulnerable_software =  Application.objects.filter(Q(updateapplications__update=update) and ~vuln_query)
+            vulnerabilties = find_vulnerabilities(update)
+            if vulnerabilties.count() > 0:
+                vulnerable = True
+                break
+        context['vulnerable'] = vulnerable
+        context['safe_software'] = safe_software
+        context['vulnerable_software'] = vulnerable_software
+    return render_to_response("dashboard.html", {"vulnerable":vulnerable})
 
 @login_required
 def device_list(request):
@@ -30,15 +46,16 @@ def device_list(request):
     no_data_devices = []
     vuln_dict = {}
     severities = {}
+    safe_software = []
+    vulnerable_software = []
     devices = False
     if account_devices:
         max_cvss = 0
         devices = True
         for device in account_devices:
             try:
-                update  = DeviceUpdate.objects.filter(device=device).latest("date")
-                software = UpdateApplications.objects.filter(update=update)
-                vulnerabilities = find_vulnerabilities(software)
+                update = DeviceUpdate.objects.filter(device=device).latest("date")
+                vulnerabilities = find_vulnerabilities(update)
                 if vulnerabilities:
                     vulnerable_devices.append(device)
                     vuln_dict[device] = vulnerabilities
@@ -46,10 +63,13 @@ def device_list(request):
                         if vuln.score > max_cvss:
                             max_cvss = vuln.score
                     severities[device] = max_cvss
+                else:
+                    safe_devices.append(device)
             except:
                 no_data_devices.append(device)
 
-    return render_to_response("devices.html", {"devices": devices, "safe_devices": safe_devices, "vulnerable_devices": vulnerable_devices, "no_data_devices": no_data_devices, "vulnerabilities": vulnerabilities, "severities": severities})
+    
+    return render_to_response("devices.html", {"devices": devices, "safe_devices": safe_devices, "vulnerable_devices": vulnerable_devices, "no_data_devices": no_data_devices, "vulnerabilities": vuln_dict, "severities": severities, "safe_software":safe_software, "vulnerable_software":vulnerable_software})
 
 @login_required
 def device(request, device_uid):
@@ -59,7 +79,9 @@ def device(request, device_uid):
         return HttpResponse("Device does not exist", status=404)
     try:
         update  = DeviceUpdate.objects.filter(device=device).latest("date")
-        software = Application.objects.filter(updateapplications__update=update)
+        vuln_query = Q(vulnerability=None)
+        safe_software = Application.objects.filter(Q(updateapplications__update=update) and vuln_query)
+        vulnerable_software =  Application.objects.filter(Q(updateapplications__update=update) and ~vuln_query)
         vulnerabilities = find_vulnerabilities(update)
         for vuln in vulnerabilities:
             try:
@@ -67,11 +89,15 @@ def device(request, device_uid):
             except:
                 references = None
             vuln.references = references
-    except StandardError,e:
-        print e
+    except DeviceUpdate.DoesNotExist:
+        safe_software=[]
+        vulnerable_software = []
+        vulnerabilities = None
+    except:
         vulnerabilities = None
 
-    return render_to_response("device.html", {"device": device, "vulnerabilities": vulnerabilities})
+
+    return render_to_response("device.html", {"device": device, "vulnerabilities": vulnerabilities, 'safe_software':safe_software, 'vulnerable_software':vulnerable_software})
 
 @login_required
 def graph_data(request):
@@ -86,7 +112,7 @@ def graph_data(request):
         except:
             pass
     jsondata = serializers.serialize('json', account_devices)
-    return HttpReponse(jsondata,mimetype='application/json')
+    return HttpResponse(jsondata,mimetype='application/json')
 
 #Handles devices sending their software lists
 @csrf_exempt
@@ -160,62 +186,60 @@ def device_update(request, device_uid):
             except KeyError:
                 unique_apps[out] = App(publisher, name, version, software["name"])
 
-        for key in sorted(unique_apps.keys(), key=lambda x: unique_apps[x].publisher):
-            app = unique_apps[key]
+
+        for key,app in sorted(unique_apps.items(), key=lambda x: x[1].publisher):
             out = key
 
             matched = False
 
-            non_match = Cpe.objects.filter(Q(product=app.name), ~Q(product=app.name, version=app.version))
             matches = Cpe.objects.filter(product=app.name, version=app.version)
-            if matches.count() > 0:
+            non_match = Cpe.objects.filter(product=app.name)
+            if matches.count() > 0 and "RELATED" not in matches[0].cpe:
                 matched = True
                 out += " VULNERABLE"
                 unsafe += 1
                 app.cpe = matches[0]
-            if non_match.count() > 0 and matches.count() == 0:
+            elif non_match.count() > 0:
                 matched = True
                 out += " SAFE"
                 safe += 1
                 app.related_cpe = non_match[0]
 
-            close = Cpe.objects.filter(vendor=app.publisher, product__contains=app.name)
-            close_match = Cpe.objects.filter(vendor=app.publisher, product__contains=app.name, version=app.version)
-            if close.count() > 0 and matches.count() == 0 and non_match.count() == 0:
-                matched = True
-                out +="SAFE"
-                safe += 1
-                app.related_cpe = close[0]
-            if close_match.count() > 0 and close.count() == 0 and matches.count() == 0 and non_match.count() == 0:
-                matched = True
-                out += " VULNERABLE"
-                unsafe += 1
-                app.cpe = close_match[0]
-
             if not matched:
-                prods = Cpe.objects.filter(version__contains=app.version)
-                for prod in prods:
-                    if prod.product.replace("_", " ") in app.title.lower():
-                        matched = True
-                        out += " SIMILAR-------------- " + prod.product
-                        similar += 1
-                        app.cpe = prod
-                    else:
-                        try:
-                            dist = fuzz.token_set_ratio(prod.product.decode("unicode_escape"), app.title)
-                        except UnicodeEncodeError:
-                            dist = 0
 
-                        if dist > 80:
+                vendor_family = Cpe.objects.filter(vendor=app.publisher, product__contains=app.name)
+                vendor_match = Cpe.objects.filter(vendor=app.publisher, product__contains=app.name, version=app.version)
+                if vendor_match.count() > 0 and "RELATED" not in vendor_match[0].cpe:
+                    matched = True
+                    out += " VULNERABLE"
+                    unsafe += 1
+                    app.cpe = vendor_match[0]
+                elif vendor_family.count() > 0:
+                    matched = True
+                    out +="SAFE"
+                    safe += 1
+                    app.related_cpe = vendor_family[0]
+
+                if not matched:
+                    prods = Cpe.objects.filter(version__contains=app.version)
+                    for prod in prods:
+                        if prod.product.replace("_", " ") in app.title.lower():
                             matched = True
-                            out += " SIMILAR" + "---------------" + prod.product
+                            out += " SIMILAR-------------- " + prod.product
                             similar += 1
+                            app.cpe = prod
+                        else:
+                            try:
+                                dist = fuzz.token_set_ratio(prod.product.decode("unicode_escape"), app.title)
+                            except UnicodeEncodeError:
+                                dist = 0
 
-            if matched:
-                print out
+                            if dist > 80:
+                                matched = True
+                                out += " SIMILAR---------------" + prod.product
+                                similar += 1
 
-
-
+            print out
 
         print safe, "safe"
         print unsafe, "unsafe"
@@ -230,9 +254,10 @@ def device_update(request, device_uid):
         matched_apps = [ app for key,app in unique_apps.items() if app.cpe is not None]
         for app in matched_apps:
             #Attach to an application
-            #This shouldnt exist
-            newApp = Application(cpe=app.cpe)
-            newApp.save()
+            #This shouldnt exist, Application objects for Vulns should exist already
+            newApp, created = Application.objects.get_or_create(cpe=app.cpe)
+            if created:
+                newApp.save()
 
             up = UpdateApplications(update=d, application=newApp)
             up.save()
@@ -240,7 +265,7 @@ def device_update(request, device_uid):
         detected_apps = [ app for key,app in unique_apps.items() if app.related_cpe is not None]
         for app in detected_apps:
             #Make a new CPE from the related CPE
-            cpe = Cpe(  
+            cpe, created = Cpe.objects.get_or_create(  
                         cpe=app.related_cpe.cpe + ":RELATED:" + app.version,
                         part=app.related_cpe.part,
                         vendor=app.related_cpe.vendor,
@@ -255,7 +280,8 @@ def device_update(request, device_uid):
                         other=app.related_cpe.other,
                         title=app.related_cpe.title
                     )
-            cpe.save()
+            if created:
+                cpe.save()
             #Create a new application
             newApp = Application(cpe=cpe)
             newApp.save()

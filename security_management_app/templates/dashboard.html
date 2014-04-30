@@ -7,24 +7,39 @@
 {% block content %}
             <div class="row">
                 <div class="col-lg-8">
-                    <div class="panel panel-danger">
+									<div class="panel panel-{% if vulnerable %}danger{% else %}success{%endif%}">
                         <div class="panel-heading">
                             <h5>Account Status</h5>
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <h1><i class="fa fa-exclamation-triangle"></i> Vulnerabilities Detected! <i class="fa fa-exclamation-triangle"></i> </h1>
+														{% if vulnerable %}
+                            <h1><i class="fa fa-exclamation-triangle"></i> Vulnerabilities Detected! </h1>
+														{% else %}
+														<h1><i class="fa fa-check"></i> No vulnerabilties detected</h1>
+														{% endif %}
                         </div>
                         <!-- /.panel-body -->
                     </div>
                     <!-- /.panel -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
+                            <h5>Device Graphs</h5>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+														<div id="graphs"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+										{% if vulnerable %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
                             <h5>List of insecure devices</h5>
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-			    <div id="graphs"></div>
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
@@ -56,6 +71,7 @@
                         <!-- /.panel-body -->
                     </div>
                     <!-- /.panel -->
+										{% endif %}
 
                 </div>
                 <!-- /.col-lg-8 -->

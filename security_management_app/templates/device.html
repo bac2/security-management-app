@@ -105,4 +105,17 @@
             <!-- /.row -->
             {% endfor %}
 
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								Installed Software
+							</div>
+							<div class="panel-body">
+								<ul class="list-group">
+									{% for software in safe_software %}
+									<li class="list-group-item">{{software.cpe.title}}</li>
+									{% endfor %}
+								</ul>
+							</div>
+
+
 {% endblock %}
