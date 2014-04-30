@@ -21,18 +21,23 @@ from datetime import datetime
 # Create your views here.
 def index(request):
     context = {}
+    safe_software = []
+    vulnerable_software = []
     if request.user.is_authenticated():
         account_devices = Device.objects.filter(owner=request.user)
         vulnerable = False
         for device in account_devices:
-            update = DeviceUpdate.objects.filter(device=account_devices).latest("date")
-            vuln_query = Q(vulnerability=None)
-            safe_software = Application.objects.filter(Q(updateapplications__update=update) and vuln_query)
-            vulnerable_software =  Application.objects.filter(Q(updateapplications__update=update) and ~vuln_query)
-            vulnerabilties = find_vulnerabilities(update)
-            if vulnerabilties.count() > 0:
-                vulnerable = True
-                break
+            try:
+                update = DeviceUpdate.objects.filter(device=account_devices).latest("date")
+                vuln_query = Q(vulnerability=None)
+                safe_software = Application.objects.filter(Q(updateapplications__update=update) and vuln_query)
+                vulnerable_software =  Application.objects.filter(Q(updateapplications__update=update) and ~vuln_query)
+                vulnerabilties = find_vulnerabilities(update)
+                if vulnerabilties.count() > 0:
+                    vulnerable = True
+                    break
+            except DeviceUpdate.DoesNotExist:
+                pass
         context['vulnerable'] = vulnerable
         context['safe_software'] = safe_software
         context['vulnerable_software'] = vulnerable_software
