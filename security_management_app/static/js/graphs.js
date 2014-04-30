@@ -318,7 +318,7 @@ d3.json("/dashboarddata", function(error, data){
 			var allowed = false;
 			if (filter.uid.length === 0){ allowed = true; }
 			for (var j = 0; j < filter.uid.length; j++){
-				if (data[i].uid === filter.uid[j]){ allowed = true; }
+				if (data[i].nickname === filter.uid[j]){ allowed = true; }
 			}
 			if (!allowed) {	continue; }
 			
