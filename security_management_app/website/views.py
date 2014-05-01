@@ -145,6 +145,8 @@ def device_update(request, device_uid):
         json_data = json.loads(request.body.decode("unicode_escape"))
         try:
             device = Device.objects.get(uid=device_uid)
+            device.os = json_data['meta']['os_name']
+            device.save()
         except Device.DoesNotExist:
             return HttpResponse("Device does not exist", status=404)
 
@@ -247,16 +249,6 @@ def device_update(request, device_uid):
                             out += " SIMILAR-------------- " + prod.product
                             similar += 1
                             app.cpe = prod
-                        else:
-                            try:
-                                dist = fuzz.token_set_ratio(prod.product.decode("unicode_escape"), app.title)
-                            except UnicodeEncodeError:
-                                dist = 0
-
-                            if dist > 80:
-                                matched = True
-                                out += " SIMILAR---------------" + prod.product
-                                similar += 1
 
             print out
 
