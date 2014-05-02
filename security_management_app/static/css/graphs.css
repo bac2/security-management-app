@@ -16,3 +16,7 @@
   stroke: #000;
   shape-rendering: crispEdges;
 }
+
+.small-text {
+	font-size: 8pt;
+}

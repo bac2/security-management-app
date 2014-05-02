@@ -146,6 +146,7 @@ d3.json("/dashboarddata", function(error, data){
 	
 	//Number of Devices by OS
 	svg1.append("text")
+		.attr("class", "small-text")
 		.text("Devices by OS");
 	svg1.selectAll(".bar")
 		.data(g1_data)
@@ -177,6 +178,7 @@ d3.json("/dashboarddata", function(error, data){
 		});		
 	
 	svg2.append("text")
+		.attr("class", "small-text")
 		.text("Vulnerabilities by Machine");
 	svg2.selectAll(".bar")
 		.data(g2_data)
@@ -208,6 +210,7 @@ d3.json("/dashboarddata", function(error, data){
 		});
 		
 	svg3.append("text")
+		.attr("class", "small-text")
 		.text("Vulnerabilities by Severity");
 	svg3.selectAll(".bar")
 		.data(g3_data)
@@ -245,6 +248,7 @@ d3.json("/dashboarddata", function(error, data){
 		
 
 	svg4.append("text")
+		.attr("class", "small-text")
 		.text("Devices By Max Severity");
 	svg4.selectAll(".bar")
 		.data(g4_data)
@@ -281,6 +285,7 @@ d3.json("/dashboarddata", function(error, data){
 		});				
 		
 	svg5.append("text")
+		.attr("class", "small-text")
 		.text("Devices by Vulnerability");
 	svg5.selectAll(".bar")
 		.data(g5_data)
