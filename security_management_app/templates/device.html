@@ -101,7 +101,7 @@
                                     </div>
 																		<div id="collapseTwo{{vuln.cve}}" class="panel-collapse collapse">
                                             <ul class="list-group">
-																								<li class="list-group-item"><a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId={{vuln.cve}}">NVD Database</a></li>
+																								<li class="list-group-item">Database entry: <a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId={{vuln.cve}}">http://web.nvd.nist.gov/view/vuln/detail?vulnId={{vuln.cve}}</a></li>
                                                 {% for reference in vuln.references %}
 																								<li class="list-group-item">{% if reference.type == "PATCH" %}Patch information: {%elif reference.type == "VENDOR_ADVISORY"%}Vendor Advisory: {%else%}Extra information: {%endif%}<a href="{{reference.address}}">{{reference.address}}</a></li>
 																								{% endfor %}
