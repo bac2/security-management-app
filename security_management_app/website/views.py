@@ -136,8 +136,11 @@ def graph_data(request):
 #Handles devices sending their software lists
 @csrf_exempt
 def device_update(request, device_uid):
-
-    if request.method == "POST":
+    if request.method == "GET":
+        update = DeviceUpdate.objects.filter(device=Device.objects.get(uid=device_uid)).latest("date")
+        vulnerabilities = find_vulnerabilities(update)
+        return HttpResponse(vulnerabilities.count())
+    elif request.method == "POST":
         safe = 0
         unsafe = 0
         similar = 0
