@@ -23,7 +23,7 @@ class Device(models.Model):
 
     @property
     def vulnerabilities(self):
-        return Vulnerability.objects.filter(application__updateapplications__update__device=self)
+        return Vulnerability.objects.filter(application__updateapplications__update__device=self).distinct()
 
 
 class Vulnerability(models.Model):
@@ -40,6 +40,10 @@ class Vulnerability(models.Model):
     availability_impact = models.CharField(max_length=30)
     def __unicode__(self):
         return self.cve
+
+    @property
+    def references(self):
+        return Reference.objects.filter(vulnerability=self)
 
 
 
