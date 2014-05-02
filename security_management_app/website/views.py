@@ -80,6 +80,7 @@ def device_list(request):
 
 @login_required
 def device(request, device_uid):
+    vulnerabilities = []
     try:
         device = Device.objects.get(uid=device_uid)
     except Device.DoesNotExist:
@@ -95,21 +96,21 @@ def device(request, device_uid):
             for vuln in app.vulnerability.all():
                 if float(vuln.score) > float(max_score):
                     max_score = vuln.score
+                vulnerabilities.append(vuln)
+            app.max_score = float(max_score)
+            app.count = app.vulnerability.all().count()
+            
 
-            app.max_score = max_score
+        vulnerable_software = sorted(vulnerable_software,reverse=True, key=lambda x: x.count)
+        vulnerable_software = sorted(vulnerable_software, reverse=True,key=lambda x: float(x.max_score))
 
-        vulnerabilities = find_vulnerabilities(update)
-        for vuln in vulnerabilities:
-            try:
-                references = Reference.objects.filter(vulnerability=vuln)
-            except:
-                references = None
-            vuln.references = references
+
     except DeviceUpdate.DoesNotExist:
         safe_software=[]
         vulnerable_software = []
         vulnerabilities = None
-    except:
+    except StandardError, e:
+        print e
         vulnerabilities = None
 
 
@@ -120,7 +121,6 @@ class DeviceEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Device):
             vulns = list(obj.vulnerabilities)
-            print "VULNS " + str(vulns)
             return {'uid':obj.uid, 'os':obj.os, 'nickname':obj.nickname, 'vulnerability':vulns, 'owner':obj.owner_id}
         if isinstance(obj, Vulnerability):
             return {'cve':obj.cve,'score':obj.score}
@@ -129,8 +129,6 @@ class DeviceEncoder(json.JSONEncoder):
 def graph_data(request):
     account_devices = list(Device.objects.filter(owner=request.user))
     
-    jsondata = serializers.serialize('json', account_devices, fields=("nickname", "uid", "vulns", "owner"))
-
     json_data = json.dumps(account_devices, cls=DeviceEncoder)
     return HttpResponse(json_data,mimetype='application/json')
 
@@ -157,6 +155,7 @@ def device_update(request, device_uid):
         except Device.DoesNotExist:
             return HttpResponse("Device does not exist", status=404)
         device.last_updated = datetime.now()
+        device.save()
 
         #Next, Munge the software list at json_data['software'] to find CPEs, etc.
         for software in json_data['software']:

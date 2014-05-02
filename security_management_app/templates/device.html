@@ -19,7 +19,7 @@
 {% block content %}
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="panel panel-default {% if vulnerabilities %}panel-danger{% else %}panel-success{% endif %}">
+									<div class="panel panel-default">
                         <div class="panel-heading">
                             Vulnerability List
                         </div>
@@ -30,22 +30,18 @@
                                         <thead>
                                             <tr>
                                                 <th>Vulnerable Applications</th>
-                                                <th>Max CVSS Score <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
-                                                <th>Vulnerability Information</th>
+                                                <th>Severity <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
+                                                <th>Number of Vulnerabilties</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for app in vulnerable_software %}
-                                            <tr class="{% if app.vulnerability.score > 5 %}danger{% else %}warning{% endif %}">
-																								<td>{{ app.cpe.title }}</td>
+                                            <tr class="{% if app.max_score > 5.0 %}danger{% else %}warning{% endif %}">
+																							<td><a class="accordionlink" onclick="test('#body{{app.cpe.product}}')" href="#detail{{app.cpe}}">{{ app.cpe.title }}</a></td>
 																								<td>{{ app.max_score }}</td>
 
 																								<td>
-																										{% for vulnerability in app.vulnerability.all %}
-																										<a href="#{{ vulnerability.cve }}">
-																											{{ vulnerability.cve }}
-																										</a>
-																									{% endfor %}
+																										{{app.vulnerability.count}}
 																								</td>
                                             </tr>
                                             {% endfor %}
@@ -61,15 +57,29 @@
                 </div>
             </div>
             <!-- /.row -->
-            {% for vuln in vulnerabilities %}
-            <div class="row">
+						<div class="panel-group" id="cpeaccordion">
+						{% for app in vulnerable_software %}
+						<div class="panel panel-default" id="detail{{app.cpe}}">
+							<div class="panel-heading" >
+									<h4 class="panel-title">
+										<a  data-toggle="collapse" data-parent="#cpeaccordion" href="#body{{app.cpe.product}}">{{app.cpe.title}}</a>
+									</h4>
+							</div>
+							<div class="panel-collapse collapse" id="body{{app.cpe.product}}">
+							<div class="panel-body">
+						
+								<div class="panel-group" id="outerAccordion{{app.product}}">
+            {% for vuln in app.vulnerability.all %}
 							<div id="{{vuln.cve}}" class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-													{{ vuln.cve }} - {{vuln.score}}<span class="pull-right"><a href="#">Top</a></span>
+													<h3 class="panel-title">
+													<a data-toggle="collapse" data-parent="#outerAccordion{{app.product}}" href="#cve_block{{vuln.cve}}">{{ vuln.cve }} - {{vuln.score}}</a><span class="pull-right"><a href="#">Top</a></span>
+												</h3>
                         </div>
                         <!-- .panel-heading -->
-                        <div class="panel-body">
+												<div class="panel-collapse collapse" id="cve_block{{vuln.cve}}">
+												<div class="panel-body">
 													<div class="panel-group" id="accordion{{vuln.cve}}">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
@@ -101,13 +111,19 @@
                             </div>
                         </div>
                         <!-- .panel-body -->
-                    </div>
+												</div>
+											</div>
                     <!-- /.panel -->
                 </div>
                 <!-- /.col-lg-12 -->
-            </div>
             <!-- /.row -->
             {% endfor %}
+					</div>
+					</div>
+				</div>
+			</div>
+						{% endfor %}
+				</div>
 
 						{% if False %}
 						<div class="panel panel-default">
@@ -124,4 +140,13 @@
 						{% endif %}
 
 
+{% endblock %}
+
+{% block js %}
+
+						<script type="text/javascript">
+								function test(e) {
+									$(e).addClass("in");
+								}
+						</script>
 {% endblock %}

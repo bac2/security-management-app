@@ -354,11 +354,11 @@ d3.json("/dashboarddata", function(error, data){
 					else if (7.0 <= score && score <= 10.0){
 						severity = "High";
 					}		
+
 					if (severity === filter.severity[j]){ allowed = true; }	
 				}				
 			}
-			if (!allowed) {	continue; }
-			
+
 			allowed = false;
 			if (filter.maxSeverity.length === 0){ allowed = true; }
 			for (var j = 0; j < filter.maxSeverity.length; j++){
@@ -381,8 +381,40 @@ d3.json("/dashboarddata", function(error, data){
 				if (severity === filter.maxSeverity[j]){ allowed = true; }						
 			}					
 			if (!allowed) {	continue; }			
+
+			if (filter.severity.length != 0) {
+			var vulns = data[i]["vulnerability"].filter(function (item) {
+					score = item["score"];
+					if (0 <= score && score <= 3.9){
+						severity = "Low";
+					}
+					else if (4.0 <= score && score <= 6.9){
+						severity = "Medium";
+					}
+					else if (7.0 <= score && score <= 10.0){
+						severity = "High";
+					}		
+
+					accept = false;
+
+					for (var j=0; j < filter.severity.length; j++) {
+
+						if (severity === filter.severity[j]) {
+							accept = true;
+						}
+					}
+					return accept;
+				});
+				var d2 = JSON.parse(JSON.stringify(data[i]));
+				d2.vulnerability = vulns;
+			} else {
+				var d2 = data[i];
+			}
+
+			if (!allowed) {	continue; }
 			
-			filtered_data.push(data[i]);
+			
+			filtered_data.push(d2);
 		}		
 		
 		console.log(filter);
