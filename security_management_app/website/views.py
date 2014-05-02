@@ -138,9 +138,12 @@ def graph_data(request):
 @csrf_exempt
 def device_update(request, device_uid):
     if request.method == "GET":
-        update = DeviceUpdate.objects.filter(device=Device.objects.get(uid=device_uid)).latest("date")
-        vulnerabilities = find_vulnerabilities(update)
-        return HttpResponse(vulnerabilities.count())
+        try:
+            update = DeviceUpdate.objects.filter(device=Device.objects.get(uid=device_uid)).latest("date")
+            vulnerabilities = find_vulnerabilities(update)
+            return HttpResponse(vulnerabilities.count())
+        except DeviceUpdate.DoesNotExist:
+            return HttpResponse("0")
     elif request.method == "POST":
         safe = 0
         unsafe = 0
@@ -150,10 +153,10 @@ def device_update(request, device_uid):
         try:
             device = Device.objects.get(uid=device_uid)
             device.os = json_data['meta']['os_name']
-            device.last_updated = datetime.now()
             device.save()
         except Device.DoesNotExist:
             return HttpResponse("Device does not exist", status=404)
+        device.last_updated = datetime.now()
 
         #Next, Munge the software list at json_data['software'] to find CPEs, etc.
         for software in json_data['software']:
