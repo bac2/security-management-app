@@ -103,7 +103,7 @@
                                             <ul class="list-group">
 																								<li class="list-group-item"><a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId={{vuln.cve}}">NVD Database</a></li>
                                                 {% for reference in vuln.references %}
-																								<li class="list-group-item"><a href="{{reference.address}}">{{reference.type}} - {{reference.source}} - {{reference.address}}</a></li>
+																								<li class="list-group-item">{% if reference.type == "PATCH" %}Patch information: {%elif reference.type == "VENDOR_ADVISORY"%}Vendor Advisory: {%else%}Extra information: {%endif%}<a href="{{reference.address}}">{{reference.address}}</a></li>
 																								{% endfor %}
                                             </ul>
                                     </div>
