@@ -43,7 +43,11 @@ class Vulnerability(models.Model):
 
     @property
     def references(self):
-        return Reference.objects.filter(vulnerability=self)
+        score = {}
+        score['PATCH'] = 1
+        score['VENDOR_ADVISORY'] = 2
+        score['UNKNOWN'] = 3
+        return sorted(list(Reference.objects.filter(vulnerability=self)), key=lambda x: score[x.type])
 
 
 
