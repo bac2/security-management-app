@@ -8,7 +8,6 @@
             <div class="row">
                 <div class="col-lg-12">
                     {% if devices %}
-                       {% if vulnerable_devices %}
                            <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <h5>List of insecure devices</h5>
@@ -19,10 +18,8 @@
                                         <table class="table">
                                             <thead>
                                                 <tr>
-                                                    <th>Device UID</th>
                                                     <th>Device Nickname</th>
                                                     <th>Status</th>
-                                                    <th>Highest CVSS Score <a href="#" data-toggle="tooltip" title="CVSS scores rate vulnerability severity from 0 to 10 (10 being most severe) on a number of factors, see the help section for more details"><i class="fa fa-info-circle"></i></a></th>
                                                     <th>Last Updated</th>
                                                 </tr>
                                             </thead>
@@ -30,10 +27,8 @@
                                                 {% for device in vulnerable_devices %}
                                                     {% if device.max_sev > 5 %}
                                                         <tr class="danger">
-                                                            <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
-                                                            <td>{{ device.nickname }}</td>
+                                                            <td><a href="/device/{{ device.uid }}">{{ device.nickname }}</a></td>
                                                             <td>High risk vulnerabilities detected - act now!</td>
-                                                            <td>{{ device.max_sev }}</td>
                                                             {% if device.last_updated %}
                                                                 <td>{{ device.last_updated }}</td>
                                                             {% else %}
@@ -42,10 +37,8 @@
                                                         </tr>
                                                     {% else %}
                                                         <tr class="warning">
-                                                            <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
-                                                            <td>{{ device.nickname }}</td>
-																														<td>{{severities.device}}DLow risk vulnerabilities detected</td>
-                                                            <td>{{ severities.cvss }}</td>
+                                                            <td><a href="/device/{{ device.uid }}">{{ device.nickname }}</a></td>
+															<td>Low risk vulnerabilities detected</td>
                                                             {% if device.last_updated %}
                                                                 <td>{{ device.last_updated }}</td>
                                                             {% else %}
@@ -54,38 +47,21 @@
                                                         </tr>
                                                     {% endif %}
                                                 {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <!-- /.table-responsive -->
-                                </div>
-                                <!-- /.panel-body -->
-                            </div>
-                            <!-- /.panel -->
-                        {% endif %}
-                        {% if safe_devices %}
-                            <div class="panel panel-success">
-                                <div class="panel-heading">
-                                    <h5>Devices with no known vulnerabilities</h5>
-                                </div>
-                                <!-- /.panel-heading -->
-                                <div class="panel-body">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Device UID</th>
-                                                    <th>Device Nickname</th>
-                                                    <th>Status</th>
-                                                    <th>Last Updated</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
                                                 {% for device in safe_devices %}
                                                     <tr class="success">
-                                                        <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
-                                                        <td>{{ device.nickname }}</td>
+                                                        <td><a href="/device/{{ device.uid }}">{{ device.nickname }}</a></td>
                                                         <td>No known vulnerabilities</td>
+                                                        {% if device.last_updated %}
+                                                            <td>{{ device.last_updated }}</td>
+                                                        {% else %}
+                                                            <td>No data uploaded</td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endfor %}
+                                                {% for device in no_data_devices %}
+                                                    <tr class="info">
+                                                        <td><a href="/device/{{ device.uid }}">{{ device.nickname }}</a></td>
+                                                        <td>No data received from device</td>
                                                         {% if device.last_updated %}
                                                             <td>{{ device.last_updated }}</td>
                                                         {% else %}
@@ -101,40 +77,6 @@
                                 <!-- /.panel-body -->
                             </div>
                             <!-- /.panel -->
-                        {% endif %}
-                        {% if no_data_devices %}
-                            <div class="panel panel-info">
-                                <div class="panel-heading">
-                                    <h5>Devices with no data</h5>
-                                </div>
-                                <!-- /.panel-heading -->
-                                <div class="panel-body">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>UID</th>
-                                                    <th>Device Nickname</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for device in no_data_devices %}
-                                                    <tr class="info">
-                                                        <td><a href="/device/{{ device.uid }}">{{ device.uid }}</a></td>
-                                                        <td>{{ device.nickname }}</td>
-                                                        <td>No data received from device</td>
-                                                    </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <!-- /.table-responsive -->
-                                </div>
-                                <!-- /.panel-body -->
-                            </div>
-                            <!-- /.panel -->
-                        {% endif %}
                     {% else %}
                         <h1>No devices registered to this account</h1>
                     {% endif %}
