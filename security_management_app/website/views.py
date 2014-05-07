@@ -23,6 +23,7 @@ def index(request):
     context = {}
     safe_software = []
     vulnerable_software = []
+    vulnerable = False
     if request.user.is_authenticated():
         account_devices = Device.objects.filter(owner=request.user)
         vulnerable = False
@@ -149,6 +150,7 @@ def device_update(request, device_uid):
         try:
             device = Device.objects.get(uid=device_uid)
             device.os = json_data['meta']['os_name']
+            device.last_updated = datetime.now()
             device.save()
         except Device.DoesNotExist:
             return HttpResponse("Device does not exist", status=404)
